@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File
 from services.pdf_service import extract_text_from_pdf
 from services.chunk_service import chunk_text
+from services.embedding_service import generate_embeddings
 import os
 import shutil
 
@@ -25,10 +26,13 @@ async def upload_file(file: UploadFile = File(...)):
     # Split the text into chunks
     chunks = chunk_text(text)
 
+    embeddings = generate_embeddings(chunks)
+
     # Return response
     return {
     "message": "File uploaded successfully",
     "filename": file.filename,
     "total_chunks": len(chunks),
-    "first_chunk": chunks[0] if chunks else "No text found in PDF."
+    "embedding_dimension": len(embeddings[0]),
+    "first_chunk": chunks[0] if chunks else "No text found."
 }
