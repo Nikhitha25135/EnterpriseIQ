@@ -14,16 +14,24 @@ collection = client.get_or_create_collection(
 
 def search_documents(question, top_k=3):
     """
-    Search the most relevant document chunks.
+    Search the most relevant document chunks from ChromaDB.
+    Returns:
+        - documents
+        - metadatas
+        - distances
     """
 
-    # Convert question into embedding
+    # Convert user question into embedding
     query_embedding = model.encode(question).tolist()
 
-    # Search ChromaDB
+    # Query ChromaDB
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=top_k
     )
 
-    return results
+    return {
+        "documents": results["documents"][0],
+        "metadatas": results["metadatas"][0],
+        "distances": results["distances"][0]
+    }

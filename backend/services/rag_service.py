@@ -8,13 +8,22 @@ client = Groq(api_key=GROQ_API_KEY)
 
 
 def ask_question(question: str):
+    """
+    Retrieve relevant document chunks,
+    generate an answer using Groq,
+    and return source citations.
+    """
 
-    # Retrieve relevant chunks from ChromaDB
+    # Search ChromaDB
     results = search_documents(question)
 
-    context = "\n\n".join(results["documents"][0])
+    documents = results["documents"]
+    metadatas = results["metadatas"]
 
-    # Build prompt
+    # Build context
+    context = "\n\n".join(documents)
+
+    # Prompt
     prompt = f"""
 You are EnterpriseIQ, an AI Knowledge Assistant.
 
@@ -49,4 +58,16 @@ Answer:
         max_tokens=300
     )
 
-    return response.choices[0].message.content
+    # Prepare source citations
+    sources = []
+
+    for metadata in metadatas:
+        sources.append({
+            "filename": metadata["filename"],
+            "chunk_id": metadata["chunk_id"]
+        })
+
+    return {
+        "answer": response.choices[0].message.content,
+        "sources": sources
+    }
