@@ -1,4 +1,5 @@
 import chromadb
+import uuid
 
 # Create a persistent ChromaDB client
 client = chromadb.PersistentClient(path="./vector_db")
@@ -14,13 +15,17 @@ def store_embeddings(chunks, embeddings, filename):
     Store document chunks and their embeddings in ChromaDB.
     """
 
+    document_id = str(uuid.uuid4())
+
     ids = []
     metadatas = []
 
-    for i in range(len(chunks)):
-        ids.append(f"{filename}_{i}")
+    for i, chunk in enumerate(chunks):
+
+        ids.append(f"{document_id}_{i}")
 
         metadatas.append({
+            "document_id": document_id,
             "filename": filename,
             "chunk_id": i,
             "document_type": "pdf"
@@ -32,3 +37,5 @@ def store_embeddings(chunks, embeddings, filename):
         embeddings=embeddings.tolist(),
         metadatas=metadatas
     )
+
+    return document_id
